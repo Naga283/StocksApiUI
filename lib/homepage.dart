@@ -1,3 +1,4 @@
+//@dart =2.9
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -7,8 +8,12 @@ import 'package:goindiastocks/apis/blockdeal/sellblock.dart';
 import 'package:goindiastocks/apis/bulkdeal/bulkbuy.dart';
 import 'package:goindiastocks/apis/bulkdeal/bulksell.dart';
 import 'package:goindiastocks/apis/bulkdeal/newapi.dart';
+import 'package:goindiastocks/practice/lib/models/newsInfo.dart';
+import 'package:goindiastocks/practice/lib/services/api_manager.dart';
+
+
 class HomePage extends StatefulWidget {
-  const HomePage({ Key? key }) : super(key: key);
+  const HomePage({ Key key }) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -20,9 +25,17 @@ class _HomePageState extends State<HomePage> {
   bool bulksellvis = false;
   bool blockdeal = false;
   bool blockdealall = false;
-  bool bulkdeal = false;
+  bool bulkdeal = true;
   bool blockbuy= false;
   bool blocksell = false;
+  List<Welcome> userData = [];
+  Future<Welcome> _newsModel;  
+   @override
+  void initState() {
+    _newsModel = API_Manager().getNews();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     
@@ -38,8 +51,28 @@ class _HomePageState extends State<HomePage> {
                 onTap: (){
                   setState(() {
                   //  vis = true;
-                  bulkdeal = true;
+                  
+                  // if(bulkdeal == true){
+                  //   bulkdeal = true;
+                  // blockdeal = false;
+                  // allvis = true;
+                  //  bulkvis = false;
+                  //   bulksellvis = false;
+                  //   blockbuy = false;
+                  //   blocksell = false;
+                  // }
+                    bulkdeal = true;
                   blockdeal = false;
+                  allvis = true;
+                  // else{
+                  // //   bulkdeal = false;
+                  // // blockdeal = false;
+                  // // allvis = false;
+                  // // bulkvis = false;
+                  // //   bulksellvis = false;
+                  // //   blockbuy = false;
+                  // //   blocksell = false;
+                  // }
                   });
                 },
                 child: Container(
@@ -56,13 +89,34 @@ class _HomePageState extends State<HomePage> {
                 onTap: (){
                   setState(() {
                   //  vis = true;
-                  bulkdeal = false;
+                  // if(blockdeal == true){
+                  //    bulkdeal = false;
+                  // blockdeal = true;
+                  // blockdealall=true;
+                  // bulkvis = false;
+                 
+                  //   bulksellvis = false;
+                  //   blockbuy = false;
+                  //   blocksell = false;
+                  // }
+                   bulkdeal = false;
                   blockdeal = true;
+                  blockdealall=true;
+                  // else{
+                  //   bulkdeal = false;
+                  // blockdeal = false;
+                  // allvis = false;
+                  // bulkvis = false;
+                  //   bulksellvis = false;
+                  //   blockbuy = false;
+                  //   blocksell = false;
+                  // }
+                 
                   });
                 },
                 child: Container(
                   padding: EdgeInsets.only(bottom: 10,left: 50,right: 50),
-                  // width: MediaQuery.of(context).size.width*0.4,
+                  
                   decoration: BoxDecoration(
                     
                     border: Border(bottom: BorderSide(width: 2.0, color: Colors.red.shade900),)
@@ -104,9 +158,22 @@ class _HomePageState extends State<HomePage> {
               GestureDetector(
                 onTap: (){
                    setState(() {
-                     allvis = false;
-                     bulkvis = true;
+                     if(blockdeal==true){
+                        allvis = false;
+                     bulkvis = false;
+                     blockbuy = true;
+                     blocksell = false;
                      bulksellvis = false;
+blockdealall = false;
+                     }
+                     else{
+                       allvis = false;
+                     bulkvis = true;
+                     blockbuy = false;
+                     blocksell = false;
+                     bulksellvis = false;
+                     }
+                    
                      
                   
                   });
@@ -115,9 +182,21 @@ class _HomePageState extends State<HomePage> {
               GestureDetector(
                 onTap: (){
                  setState(() {
-                    allvis = false;
+                    if(blockdeal==true){
+                        allvis = false;
                      bulkvis = false;
+                     blockbuy = false;
+                     blocksell = true;
+                     bulksellvis = false;
+blockdealall = false;
+                     }
+                     else{
+                       allvis = false;
+                     bulkvis = false;
+                     blockbuy = false;
+                     blocksell = false;
                      bulksellvis = true;
+                     }
                  });
                 },
                 child: all(text: 'Sell', col: Colors.red, textCol: Colors.white, bordCol: Colors.red,))
@@ -127,8 +206,18 @@ class _HomePageState extends State<HomePage> {
           ),
           SizedBox(height: 20,),
          
-          TextFormField(
-            
+          TextField(
+            onChanged: (text){
+              text = text.toLowerCase();
+              setState(() {
+                //  _newsModel = _newsModel.where((client){
+                   
+                //  })
+               print(text);
+                        print("Searching Started");
+                       print(userData);
+              });
+            },
             decoration: InputDecoration(hintText: "\t\t\t\tSearch Client Name",
             
           border:OutlineInputBorder(borderRadius: BorderRadius.circular(40))
@@ -136,26 +225,26 @@ class _HomePageState extends State<HomePage> {
           ),
           SizedBox(height: 10,),
            Divider(thickness: 2,),
-           Text(blockdeal.toString()+blockdealall.toString()),
-           Text(bulkdeal.toString()+bulkvis.toString()),
+           Text(blockdeal.toString()+blockdealall.toString()+blockbuy.toString()+blocksell.toString()),
+           Text(bulkdeal.toString()+allvis.toString()+bulkvis.toString()+bulksellvis.toString()),
            Visibility(
              visible: allvis,
              child: Flexible(child: AllApi())),
-           Visibility(
-             visible: bulkvis,
-             child: Flexible(child: BulkBuy())),
+          //  Visibility(
+          //    visible: bulkvis,
+          //    child: Flexible(child: BulkBuy())),
           //     Visibility(
           //    visible: bulksellvis,
           //    child: Flexible(child: BulkSell())),
-          Visibility(
-            visible: blockdealall,
-            child: Flexible(child: AllBlockDeal())),
-             Visibility(
-            visible: false,
-            child: Flexible(child: BlockBuy())),
-             Visibility(
-            visible: false,
-            child: Flexible(child: BlockSell())),
+          // Visibility(
+          //   visible: blockdealall,
+          //   child: Flexible(child: AllBlockDeal())),
+          //    Visibility(
+          //   visible: blockbuy,
+          //   child: Flexible(child: BlockBuy())),
+          //    Visibility(
+          //   visible: blocksell,
+          //   child: Flexible(child: BlockSell())),
         ],
       ),
     );
@@ -164,7 +253,7 @@ class _HomePageState extends State<HomePage> {
 
 class all extends StatelessWidget {
   const all({
-    Key? key, required this.text, required this.col, required this.textCol, required this.bordCol,
+    Key key, this.text,  this.col, this.textCol,this.bordCol,
   }) : super(key: key);
 final String text;
 final Color col;

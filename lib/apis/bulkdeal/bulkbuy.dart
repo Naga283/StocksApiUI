@@ -12,6 +12,7 @@ class BulkBuy extends StatefulWidget {
 class _BulkBuyState extends State<BulkBuy> {
    List listResponse = [];
     Map mapResponse = {};
+    String clientName="";
     Future fetchData() async {
     http.Response response;
     response = await http
@@ -20,6 +21,7 @@ class _BulkBuyState extends State<BulkBuy> {
       setState(() {
         mapResponse = json.decode(response.body);
         listResponse = mapResponse["Data"];
+        
       });
     }
   }
@@ -39,6 +41,8 @@ class _BulkBuyState extends State<BulkBuy> {
           shrinkWrap: true,
           itemCount: listResponse == null?0:listResponse.length,
           itemBuilder: (context,index){
+           
+            print("Detaqils"+clientName);
           return   Padding(
             padding: const EdgeInsets.all(8.0),
             child: listResponse[index]["DealType"]=="BUY"? Card(

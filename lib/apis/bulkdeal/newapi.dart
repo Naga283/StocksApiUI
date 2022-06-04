@@ -1,31 +1,26 @@
+//@dart =2.9
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:goindiastocks/practice/lib/models/newsInfo.dart';
+import 'package:goindiastocks/practice/lib/services/api_manager.dart';
 import 'package:http/http.dart' as http;
 class AllApi extends StatefulWidget {
-  const AllApi({ Key? key }) : super(key: key);
+   AllApi({ Key key }) : super(key: key);
+  List listResponse = [];
 
   @override
   _AllApiState createState() => _AllApiState();
 }
 
+
 class _AllApiState extends State<AllApi> {
-   List listResponse = [];
-    Map mapResponse = {};
-    Future fetchData() async {
-    http.Response response;
-    response = await http
-        .get(Uri.parse("https://www.goindiastocks.com/api/service/GetBulkBlockDeal?fincode=100114&DealType=Bulk_Deal"));
-    if (response.statusCode == 200) {
-      setState(() {
-        mapResponse = json.decode(response.body);
-        listResponse = mapResponse["Data"];
-      });
-    }
-  }
+  List<Datum> news =<Datum>[];
+  List<Datum> dataDisplay =<Datum>[];
+  Future<Welcome> _newsModel;  
    @override
   void initState() {
-    fetchData();
+    _newsModel = API_Manager().getNews();
     super.initState();
   }
 
@@ -34,56 +29,96 @@ class _AllApiState extends State<AllApi> {
     
     return Container(
      
-      child:mapResponse==null?Container():Container(
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: listResponse == null?0:listResponse.length,
-          itemBuilder: (context,index){
-          return   Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Card(
-              child: Container(
-                margin: EdgeInsets.only(left: 3,top: 2,bottom: 2),
-                decoration: BoxDecoration(
-                
-                  border:Border(left: BorderSide(color: listResponse[index]["DealType"]=="BUY"?Colors.green:Colors.red,width: 3.0,))
-             
-                ),
-                padding: EdgeInsets.all(20),
-                child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(listResponse[index]["ClientName"].toString().replaceFirst(RegExp("LIMITED"),"" ),style:TextStyle(fontSize: 16,fontWeight: FontWeight.bold)),
-                      
-                      Text(listResponse[index]["DealDate"].toString().substring(0,10))
-                    ],
-                  ),
-                  SizedBox(height: 10,),
-                  Row(
-                    children: [
-                      Text("${listResponse[index]["DealType"]} ".replaceFirst(RegExp("BUY"), "Bought",),style:TextStyle(color: listResponse[index]["DealType"]=="BUY"?Colors.green:Colors.red)),
-                      Text("${listResponse[index]["Quantity"]} ",style:TextStyle(color: listResponse[index]["DealType"]=="BUY"?Colors.green:Colors.red)),
-                      Text("shares ",style:TextStyle(color: listResponse[index]["DealType"]=="BUY"?Colors.green:Colors.red)),
-    
-                      Text("@ Rs "+listResponse[index]["TradePrice"]),
-                    ],
-                  ),
-                  SizedBox(height: 10,),
-                  Row(
-                    children: [
-                      Text("Value  Rs ",style: TextStyle(color: Colors.blue),),
-                     
-                      Text("${listResponse[index]["Value"].toString().substring(0,3)}"+"."+listResponse[index]["Value"][4]+" cr",style: TextStyle(color: Colors.blue)),
-                    ],
-                  )
-
-                ],
+      child:Container(
+        child: FutureBuilder<Welcome>(
+          future: _newsModel,
+          
+          builder: (context,snapshot) {
+            return Column(
+              children: [
+                 TextField(
+            onChanged: (text){
+              text = text.toLowerCase();
+              setState(() {
+                news = dataDisplay.where((e){
+                  var postTitle = e.clientName.toLowerCase();
+                  print(postTitle);
+                  return postTitle.contains(text);
+                }).toList();
+              //  var fetchdata = snapshot.data.data;
+                // _newsModel =_newsModel.where((client){
+                //   var clienType = client.clientName.toLowerCase();
+                //   return clienType.contains(text);
+                // }).toList();
+               print(text);
+                        print("Searching Started");
+                        
+                       
+              });
+            },
+            decoration: InputDecoration(hintText: "\t\t\t\tSearch Client Name",
+            
+          border:OutlineInputBorder(borderRadius: BorderRadius.circular(40))
             ),
-              ),),
-          );
-        })
+          ),
+          SizedBox(height: 10,),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: snapshot.data == null?0:snapshot.data.data.length,
+                    itemBuilder: (context,index){
+                      var fetchdata = snapshot.data.data[index];
+                     //  clientName = listResponse[index]["ClientName"].toString();
+                    return   Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Card(
+                        child: Container(
+                          margin: EdgeInsets.only(left: 3,top: 2,bottom: 2),
+                          decoration: BoxDecoration(
+                          
+                            border:Border(left: BorderSide(color: fetchdata.dealType.toString().substring(9)=="BUY"?Colors.green:Colors.red,width: 3.0,))
+                       
+                          ),
+                          padding: EdgeInsets.all(20),
+                          child: Column(
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(fetchdata.clientName.toString().replaceFirst(RegExp("LIMITED"),"" ),style:TextStyle(fontSize: 16,fontWeight: FontWeight.bold)),
+                                
+                                Text(fetchdata.dealDate.toString().substring(0,10))
+                              ],
+                            ),
+                            SizedBox(height: 10,),
+                            Row(
+                              children: [
+                                Text("${fetchdata.dealType} ".replaceFirst(RegExp("BUY"), "Bought",).substring(9),style:TextStyle(color: fetchdata.dealType.toString().substring(9)=="BUY"?Colors.green:Colors.red)),
+                                Text("${fetchdata.quantity} ",style:TextStyle(color: fetchdata.dealType.toString().substring(9) =="BUY"?Colors.green:Colors.red)),
+                                Text("shares ",style:TextStyle(color: fetchdata.dealType.toString().substring(9)=="BUY"?Colors.green:Colors.red)),
+                    
+                                Text("@ Rs "+fetchdata.tradePrice),
+                              ],
+                            ),
+                            SizedBox(height: 10,),
+                            Row(
+                              children: [
+                                Text("Value  Rs ",style: TextStyle(color: Colors.blue),),
+                               
+                                Text("${fetchdata.value.toString().substring(0,3)}"+"."+fetchdata.value[4]+" cr",style: TextStyle(color: Colors.blue)),
+                              ],
+                            )
+                
+                          ],
+                      ),
+                        ),),
+                    );
+                  }),
+                ),
+              ],
+            );
+          }
+        )
       ),
     );
   }
