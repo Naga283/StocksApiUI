@@ -3,7 +3,7 @@
 A new Flutter project.
 
 ## Description
-Rhis application contains stocks api,it filters result like buy,sell.
+This application contains stocks api,it filters result like buy,sell.
 
 
 
